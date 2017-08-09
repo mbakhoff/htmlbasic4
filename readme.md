@@ -22,6 +22,12 @@ All the following is already configured, but it's good to point out a few things
   * `spring.jpa.properties.hibernate.hbm2ddl.auto` specifies that spring should automatically create and update our database tables,
   * `spring.jpa.properties.hibernate.dialect` tells Hibernate that we're using the H2 database
 
+H2 is an embedded database.
+You don't have to install or start it manually.
+Maven will download it for you.
+Spring will start it automatically in the background when the server is starting.
+Embedded means that it's not even a separate process - it will run in the same process as our server.
+
 ### Storing data in the database
 
 Databases are really good at storing data.
@@ -45,7 +51,7 @@ When the server starts up, Hibernate will scan all classes, find the annotated c
 You should also add an `id` field of type `Long` to each of your entity classes.
 This enables Hibernate to match the java objects to the database table rows.
 
-Finally, you should annotate your collection fields with multiplicity annotations (`@OneToOne`, `@OneToMany`, `@ManyToMany`) so that hibernate will know how to connect the database tables. 
+Finally, you should annotate your collection fields with multiplicity annotations (`@OneToOne`, `@OneToMany`, `@ManyToMany`) so that hibernate will know how to connect the database tables.
 Internally that works by using foreign keys and junction tables, but it's all automated by Hibernate.
 
 Here is an example of an entity class:
@@ -56,8 +62,8 @@ public class Person {
     @Id
     @GeneratedValue
     private Long id;
-    
-    @OneToMany 
+
+    @OneToMany
     private List<Phone> phones = new ArrayList<>();
 
     // getters, setters
@@ -79,7 +85,7 @@ public class Phone {
 To recap:
 * `@Entity` tells Hibernate that objects of this class will be stored in a database
 * `@Id` tells Hibernate to store the table row id in the annotated field
-* `@GeneratedValue` tells Hibernate to set the id field to the table's row id when the object is saved to the database
+* `@GeneratedValue` tells Hibernate to assign the object a new unique id when saving it (unless it already has an id).
 * `@OneToMany` tells Hibernate that one person can have many phones
 
 ### Using repositories
@@ -87,22 +93,22 @@ To recap:
 How does one actually save and fetch the objects from the database?
 Spring Data introduces the concept of a Repository - an interface that defines methods to save and find objects.
 You should create a repository for each of your entity classes (if needed) by extending the CrudRepository interface (from Spring Data):
- 
+
 ```java
 public interface CrudRepository<T, ID> extends Repository<T, ID> {
-  T save(T entity); 
-  T findOne(ID primaryKey);       
-  Iterable<T> findAll();            
-  void delete(T entity);          
+  T save(T entity);
+  T findOne(ID primaryKey);
+  Iterable<T> findAll();
+  void delete(T entity);
   // more methods
 }
 ```
 
-For example, to create a repository for Person, you would write: 
+For example, to create a repository for Person, you would write:
 
 ```java
-public interface PersonRepository extends CrudRepository<Person, Long> {    
-  // bunch of useful methods inherited from CrudRepository 
+public interface PersonRepository extends CrudRepository<Person, Long> {
+  // bunch of useful methods inherited from CrudRepository
 }
 ```
 
@@ -125,10 +131,10 @@ This sample code would work:
 public class Person {
     @Id
     @GeneratedValue
-    private Long id;    
+    private Long id;
 }
 
-public interface PersonRepository extends CrudRepository<Person, Long> {    
+public interface PersonRepository extends CrudRepository<Person, Long> {
 }
 
 @Controller
@@ -161,26 +167,26 @@ public class Person {
     @Id
     @GeneratedValue
     private Long id;
-   
+
     private String firstName;
     private String lastName;
 }
 
 public interface PersonRepository extends CrudRepository<Person, Long> {
-  
+
   List<Person> findByFirstName(String name);
-  
+
   Person findByFirstNameAndLastName(String first, String last);
-  
+
 }
 ```
 
 In this example, Spring Data will try to implement the `PersonRepository` interface and find our findBy methods.
-Next it will analyze the method names: 
+Next it will analyze the method names:
 * it will ignore everything up to the "By" keyword: "findBy".
 * next it will find "FirstName" - this matches a field name in the `Person` class
 * "And" is a special keyword - in the "findByFirstNameAndLastName" case it will find "LastName" after "And", which also matches a field
-* next it will try to find a parameter for each field that was referenced in the method name. 
+* next it will try to find a parameter for each field that was referenced in the method name.
   here it will just look at the parameter order - "FirstName" is the first field in the name, thus the first parameter must be the value of firstName that we're looking for etc.
 * finally, it will look at the return type - you can ask for a single object or a whole list
 
@@ -188,7 +194,7 @@ See the [Spring Data docs](https://docs.spring.io/spring-data/jpa/docs/current/r
 
 ### Transactions and managed entities
 
-Let's look at some more examples: 
+Let's look at some more examples:
 
 ```java
 Person p = new Person();
@@ -205,15 +211,15 @@ p.setLastName("the Second");
 Here the first example saves a new Person object to the database using the `save` method.
 The other example first fetches the same person and then changes his last name.
 Note that `save` is not called after changing the name.
-Is the change saved to the database? 
+Is the change saved to the database?
 Oddly, it is.
 
-Internally, Hibernate keeps track of all the objects that it has seen. 
-It remembers each object that it returns through queries (find methods in the repositories) as well as any objects you save through the repositories. 
-You can imagine that Hibernate has a field `List<Object> managedObjects`. 
-Initially, the list is empty. 
-When you query and save objects using the repositories, all the used objects are placed in the `managedObjects` list. 
-Finally, when all the work is done, Hibernate inspects each object in the list and inserts/updates it in the database. 
+Internally, Hibernate keeps track of all the objects that it has seen.
+It remembers each object that it returns through queries (find methods in the repositories) as well as any objects you save through the repositories.
+You can imagine that Hibernate has a field `List<Object> managedObjects`.
+Initially, the list is empty.
+When you query and save objects using the repositories, all the used objects are placed in the `managedObjects` list.
+Finally, when all the work is done, Hibernate inspects each object in the list and inserts/updates it in the database.
 
 How does Hibernate know that all the work is done and the changes should be sent to the database?
 Spring has an annotation `@Transactional`.
@@ -235,11 +241,11 @@ Some hints to help you along:
 * make sure you add all the proper annotations to your classes
 * when Hibernate is very unhappy with something, deleting the database data files might help (forum-data.mv.db, forum-data.trace.db)
 * thymeleaf can use fields in your objects: `${forumPost.text}`
-* hibernate needs your entity classes to have a default constructor (constructor without parameters). 
+* hibernate needs your entity classes to have a default constructor (constructor without parameters).
   you can still have other constructors.
 * read the docs. not all will make sense, but there are good code examples.
   reading about the multiplicity annotations from the Hibernate docs can be especially useful.
- 
+
 ## Task: add timestamps to the posts
 
 It would be nice to know when each post was created.
@@ -265,13 +271,13 @@ Now that we have users, each post should be linked to one.
 As we don't have login support yet, we will have to work around it.
 We'll add proper login support in the next tutorial.
 
-* each ForumPost object should reference it's author 
+* each ForumPost object should reference it's author
 * when writing a new post, let the user specify his email
-* when rendering a post, show the user's display name  
+* when rendering a post, show the user's display name
 
 Some hints:
 * save the post's author in a field of type User
 * there's some new tricks hidden in the sample templates, in particular `th:field` in the edit template.
   it creates both the name and value attribute for the input.
-  using it is optional, but recommended.   
+  using it is optional, but recommended.
 * thymeleaf has optional special integration with spring as documented [here](http://www.thymeleaf.org/doc/tutorials/3.0/thymeleafspring.html) and [here](http://www.thymeleaf.org/doc/articles/springmvcaccessdata.html).
