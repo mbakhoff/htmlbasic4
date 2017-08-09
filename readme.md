@@ -51,7 +51,7 @@ When the server starts up, Hibernate will scan all classes, find the annotated c
 You should also add an `id` field of type `Long` to each of your entity classes.
 This enables Hibernate to match the java objects to the database table rows.
 
-Finally, you should annotate your collection fields with multiplicity annotations (`@OneToOne`, `@OneToMany`, `@ManyToMany`) so that hibernate will know how to connect the database tables.
+Finally, you should annotate your collection fields with association annotations (`@OneToOne`, `@OneToMany`, `@ManyToMany`) so that hibernate will know how to connect the database tables.
 Internally that works by using foreign keys and junction tables, but it's all automated by Hibernate.
 
 Here is an example of an entity class:
@@ -190,7 +190,7 @@ Next it will analyze the method names:
   here it will just look at the parameter order - "FirstName" is the first field in the name, thus the first parameter must be the value of firstName that we're looking for etc.
 * finally, it will look at the return type - you can ask for a single object or a whole list
 
-See the [Spring Data docs](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods) for all keywords.
+See the [Spring Data docs](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods) for all the keywords.
 
 ### Transactions and managed entities
 
@@ -244,7 +244,7 @@ Some hints to help you along:
 * hibernate needs your entity classes to have a default constructor (constructor without parameters).
   you can still have other constructors.
 * read the docs. not all will make sense, but there are good code examples.
-  reading about the multiplicity annotations from the Hibernate docs can be especially useful.
+  reading about the association annotations from the [Hibernate docs](https://docs.jboss.org/hibernate/orm/5.2/userguide/html_single/Hibernate_User_Guide.html) can be especially useful.
 
 ## Task: add timestamps to the posts
 
