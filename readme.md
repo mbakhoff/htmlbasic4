@@ -245,6 +245,8 @@ Some hints to help you along:
   you can still have other constructors.
 * read the docs. not all will make sense, but there are good code examples.
   reading about the association annotations from the [Hibernate docs](https://docs.jboss.org/hibernate/orm/5.2/userguide/html_single/Hibernate_User_Guide.html) can be especially useful.
+* usually you want to add `cascade = CascadeType.ALL` to your association annotations.
+  this way when you save a forum thread, Hibernate will also save the forum posts attached to it.
 
 ## Task: add timestamps to the posts
 
