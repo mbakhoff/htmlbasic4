@@ -282,4 +282,4 @@ Some hints:
 * there's some new tricks hidden in the sample templates, in particular `th:field` in the edit template.
   it creates both the name and value attribute for the input.
   using it is optional, but recommended.
-* thymeleaf has optional special integration with spring as documented [here](http://www.thymeleaf.org/doc/tutorials/3.0/thymeleafspring.html) and [here](http://www.thymeleaf.org/doc/articles/springmvcaccessdata.html).
+
