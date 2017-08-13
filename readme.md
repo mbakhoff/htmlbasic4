@@ -248,6 +248,15 @@ Some hints to help you along:
 * usually you want to add `cascade = CascadeType.ALL` to your association annotations.
   this way when you save a forum thread, Hibernate will also save the forum posts attached to it.
 
+## Task: use thread id in the url
+
+We've been using the `/threads/{threadName}` url scheme since the beginning.
+Unfortunately it's not very reliable: try creating a thread with the name "../error".
+Now that each of our thread has its own unique id, we could use that, instead.
+
+Change the urls to use the thread id instead of the thread name: `/threads/{threadId}`.
+Verify that all the controllers and forms work.
+
 ## Task: add timestamps to the posts
 
 It would be nice to know when each post was created.
